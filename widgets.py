@@ -1,3 +1,4 @@
+from distutils.command.config import config
 from turtle import title
 import ipyvuetify as v
 from typing import Dict, List
@@ -5,6 +6,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
 import ipywidgets as ipw
+
+v.theme.dark = True
 
 
 def new_factory(news: List[Dict]) -> v.Html:
@@ -52,7 +55,7 @@ def financial_info_factory(data: List[Dict], ticker: str = "") -> v.Html:
     )
 
 
-def price_widget_factory(df: List, ticker: str = "") -> ipw.Widget:
+def price_chart_factory(df: List, ticker: str = "") -> ipw.Widget:
     # Create figure with secondary y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -80,6 +83,7 @@ def price_widget_factory(df: List, ticker: str = "") -> ipw.Widget:
 
     fig.layout.yaxis2.showgrid = False
     fig.update_layout(
+        autosize=True,
         xaxis_rangeslider_visible=False,
         template="plotly_dark",
         title={
@@ -89,5 +93,21 @@ def price_widget_factory(df: List, ticker: str = "") -> ipw.Widget:
             "x": 0.5,
         },
     )
-    widget = go.FigureWidget(fig)
+    widget = go.FigureWidget(fig, layout=ipw.Layout(height='100%'))
+    return widget
+
+
+def price_history_factory(df: List, ticker: str = "") -> ipw.Widget:
+    # include candlestick with rangeselector
+    widget = go.FigureWidget(go.Scatter(x=df.index, y=df["Close"]))
+    widget.update_layout(
+        autosize=True,
+        template="plotly_dark",
+        title={
+            "text": f"{ticker.upper()} PRICE HISTORY",
+            "xanchor": "center",
+            "yanchor": "top",
+            "x": 0.5,
+        },
+    )
     return widget
