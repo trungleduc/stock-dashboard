@@ -1,4 +1,4 @@
-voila
+voila==0.3.0
 ipywidgets
 ipyflex
 plotly
