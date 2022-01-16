@@ -1,0 +1,1 @@
+web: voila --port=$PORT --Voila.ip=0.0.0.0 --no-browser --VoilaConfiguration.theme=dark  dashboard.ipynb

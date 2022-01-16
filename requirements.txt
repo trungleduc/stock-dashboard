@@ -1,0 +1,6 @@
+voila
+ipywidgets
+ipyflex
+plotly
+yfinance
+ipyvuetify
