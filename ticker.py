@@ -1,15 +1,34 @@
 from typing import Dict, List
 import yfinance as yf
+from pathlib import Path
+import os, time, json
 
 
 class TickerData:
     def __init__(self, ticker: str) -> None:
-        self._ticker = yf.Ticker(ticker)
-        self._info = self._ticker.get_info()
+        ticker = ticker.upper()
+        self.fetch_ticker(ticker)
 
-    @property
-    def news(self) -> List:
-        return self._ticker.news
+    def fetch_ticker(self, ticker: str):
+        self._ticker = yf.Ticker(ticker)
+        cache = f"./cache/{ticker}.json"
+        cached = os.path.exists(cache)
+        if not cached:
+            os.makedirs(os.path.dirname(cache), exist_ok=True)
+            time_delta = 100
+        else:
+            time_delta = (time.time() - os.path.getmtime(cache)) / (60 * 60 * 24)
+
+        if not cached or time_delta > 1:
+            self._info = self._ticker.get_info()
+            self.news = self._ticker.news
+            with open(cache, "w") as f:
+                json.dump({"info": self._info, "news": self.news}, f)
+        else:
+            with open(cache, "r") as f:
+                cached_data = json.load(f)
+                self._info = cached_data["info"]
+                self.news = cached_data["news"]
 
     @property
     def financial_info(self) -> List[Dict]:

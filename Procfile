@@ -1,1 +1,1 @@
-web: voila --port=$PORT --Voila.ip=0.0.0.0 --no-browser --VoilaConfiguration.theme=dark  dashboard.ipynb
+web: voila --port=$PORT --Voila.ip=0.0.0.0 --no-browser --VoilaConfiguration.theme=dark --preheat_kernel=True --pool_size=5  dashboard.ipynb

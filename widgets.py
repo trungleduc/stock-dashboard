@@ -46,7 +46,7 @@ def financial_info_factory(data: List[Dict], logo_url: str = None) -> v.Html:
         logo = v.Card(
             outlined=True,
             class_="ma-1",
-            children=[v.Img(src=logo_url, height='100px')],
+            children=[v.Img(src=logo_url, height='100px', contain=True)],
             style_="width: calc(14.28% - 8px); min-width: 150px",
         )
         children.append(logo)
