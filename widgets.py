@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Dict, List
-
+import json
 import ipyvuetify as v
 import ipywidgets as ipw
 import plotly.graph_objects as go
@@ -12,21 +12,21 @@ v.theme.dark = True
 def new_factory(news: List[Dict]) -> v.Html:
     children = []
     for new in news:
-        date = datetime.fromtimestamp(new["providerPublishTime"])
+        date = datetime.fromtimestamp(new['providerPublishTime'])
         btn = v.Btn(
             small=True,
             text=True,
             block=True,
-            children=["Open"],
-            href=new["link"],
-            target="_blank",
+            children=['Open'],
+            href=new['link'],
+            target='_blank',
         )
         card = v.Card(
             outlined=True,
             children=[
                 v.CardTitle(
-                    children=[new["title"]],
-                    style_="font-size: 1.1rem",
+                    children=[new['title']],
+                    style_='font-size: 1.1rem',
                 ),
                 v.CardSubtitle(
                     children=[
@@ -37,7 +37,7 @@ def new_factory(news: List[Dict]) -> v.Html:
             ],
         )
         children.append(card)
-    return v.Html(tag="div", class_="d-flex flex-column", children=children)
+    return v.Html(tag='div', class_='d-flex flex-column', children=children)
 
 
 def financial_info_factory(data: List[Dict], logo_url: str = None) -> v.Html:
@@ -45,54 +45,57 @@ def financial_info_factory(data: List[Dict], logo_url: str = None) -> v.Html:
     if logo_url is not None:
         logo = v.Card(
             outlined=True,
-            class_="ma-1",
+            class_='ma-1',
             children=[v.Img(src=logo_url, height='100px', contain=True)],
-            style_="width: calc(14.28% - 8px); min-width: 150px",
+            style_='width: calc(14.28% - 8px); min-width: 150px',
         )
         children.append(logo)
-        
+
     for item in data:
         card = v.Card(
             outlined=True,
-            class_="ma-1",
+            class_='ma-1',
             children=[
                 v.CardTitle(
                     primary_title=True,
-                    children=[item["title"]],
-                    style_="font-size: 18px; color: #51ef98",
+                    children=[item['title']],
+                    style_='font-size: 18px; color: #51ef98',
                 ),
-                v.CardText(children=[str(item["value"])]),
+                v.CardText(children=[str(item['value'])]),
             ],
-            style_="width: calc(14.28% - 8px); min-width: 150px",
+            style_='width: calc(14.28% - 8px); min-width: 150px',
         )
         children.append(card)
     return v.Html(
-        tag="div", class_="d-flex flex-row", children=children, style_="flex-wrap: wrap"
+        tag='div',
+        class_='d-flex flex-row',
+        children=children,
+        style_='flex-wrap: wrap',
     )
 
 
-def price_chart_factory(df: List, ticker: str = "") -> ipw.Widget:
+def price_chart_factory(df: List, ticker: str = '') -> ipw.Widget:
     # Create figure with secondary y-axis
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig = make_subplots(specs=[[{'secondary_y': True}]])
 
     # include candlestick with rangeselector
     fig.add_trace(
         go.Candlestick(
             x=df.index,
-            open=df["Open"],
-            high=df["High"],
-            low=df["Low"],
-            close=df["Close"],
-            name="OHLC",
+            open=df['Open'],
+            high=df['High'],
+            low=df['Low'],
+            close=df['Close'],
+            name='OHLC',
         ),
         secondary_y=True,
     )
     fig.add_trace(
         go.Bar(
             x=df.index,
-            y=df["Volume"],
-            marker_color="rgba(91, 91, 91, 0.73)",
-            name="Volume",
+            y=df['Volume'],
+            marker_color='rgba(91, 91, 91, 0.73)',
+            name='Volume',
         ),
         secondary_y=False,
     )
@@ -101,29 +104,29 @@ def price_chart_factory(df: List, ticker: str = "") -> ipw.Widget:
     fig.update_layout(
         autosize=True,
         xaxis_rangeslider_visible=False,
-        template="plotly_dark",
+        template='plotly_dark',
         title={
-            "text": f"{ticker.upper()} PRICE CHART",
-            "xanchor": "center",
-            "yanchor": "top",
-            "x": 0.5,
+            'text': f'{ticker.upper()} PRICE CHART',
+            'xanchor': 'center',
+            'yanchor': 'top',
+            'x': 0.5,
         },
     )
-    widget = go.FigureWidget(fig, layout=ipw.Layout(height="100%"))
+    widget = go.FigureWidget(fig, layout=ipw.Layout(height='100%'))
     return widget
 
 
-def price_history_factory(df: List, ticker: str = "") -> ipw.Widget:
+def price_history_factory(df: List, ticker: str = '') -> ipw.Widget:
     # include candlestick with rangeselector
-    widget = go.FigureWidget(go.Scatter(x=df.index, y=df["Close"]))
+    widget = go.FigureWidget(go.Scatter(x=df.index, y=df['Close']))
     widget.update_layout(
         autosize=True,
-        template="plotly_dark",
+        template='plotly_dark',
         title={
-            "text": f"{ticker.upper()} PRICE HISTORY",
-            "xanchor": "center",
-            "yanchor": "top",
-            "x": 0.5,
+            'text': f'{ticker.upper()} PRICE HISTORY',
+            'xanchor': 'center',
+            'yanchor': 'top',
+            'x': 0.5,
         },
     )
     return widget
@@ -135,8 +138,59 @@ def text_widget(title: str, text: str) -> ipw.Widget:
         children=[
             v.CardTitle(
                 children=[title],
-                style_="font-size: 1.1rem",
+                style_='font-size: 1.1rem',
             ),
             v.CardText(children=[text]),
         ],
+    )
+
+
+def balance_sheet_factory(df) -> ipw.Widget:
+    items = []
+    for i in range(df.shape[0]):
+        row = df.iloc[i]
+        item = {'name': row.name}
+        item.update(json.loads(row.to_json()))
+        items.append(item)
+    titles = [x for x in items[0].keys() if x != 'name']
+    headers = [
+        {
+            'text': 'Property',
+            'align': 'start',
+            'sortable': False,
+            'value': 'name',
+        }
+    ]
+    for title in titles:
+        date = datetime.fromtimestamp(int(title) / 1000)
+        header = {'text': date.strftime('%m/%d/%Y, %H:%M'), 'value': title}
+        headers.append(header)
+    return v.DataTable(
+        headers=headers,
+        items=items,
+    )
+
+
+def analysis_factory(df) -> ipw.Widget:
+    items = []
+    for i in range(df.shape[0]):
+        row = df.iloc[i]
+        item = {'name': row.name}
+        item.update(json.loads(row.to_json()))
+        items.append(item)
+    titles = [x for x in items[0].keys() if x != 'name']
+    headers = [
+        {
+            'text': 'Property',
+            'align': 'start',
+            'sortable': False,
+            'value': 'name',
+        }
+    ]
+    for title in titles:
+        header = {'text': title, 'value': title}
+        headers.append(header)
+    return v.DataTable(
+        headers=headers,
+        items=items,
     )
